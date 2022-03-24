@@ -126,6 +126,7 @@ def add_perfiles():
 
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
+    print('simon')
     nombre = request.headers.get('nombre')
     postgreSQL_select_Query = "select * from contenido where nombre ILIKE '%s';"%(nombre)
     cursor.execute(postgreSQL_select_Query)
