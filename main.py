@@ -3,6 +3,7 @@ from flask import jsonify
 from config import config
 import psycopg2
 from perfiles import *
+from contenido_premios import *
 
 connection = psycopg2.connect(user="postgres",
                                   password="ketchup14",
@@ -42,7 +43,7 @@ def add_directores():
     sql = "INSERT INTO director VALUES('%s', '%s')"
     cursor.execute(sql%tuple(lista))
     connection.commit()
-    response = {'message': 'success'}
+    response = {'Success 200': 'success'}
     return jsonify(response)
 
 @app.route('/api/signin', methods=['GET'])
@@ -55,9 +56,9 @@ def signin():
     if data:
         passw = data[0][0]
         if(passw==password):
-            response = {'success': 'si entraste'}
+            response = {'Success 200': 'si entraste'}
         else:
-            response = {'error': 'contraseña o correo invalido'}
+            response = {'Error 401' : 'contraseña o correo invalido'}
 
     return jsonify(response)
 
@@ -76,7 +77,7 @@ def logon():
         connection.commit()
         response = {'success': 'cuenta añadida'}
     else:
-        response = {'error': 'correo ya existente'}
+        response = {'Error 409': 'correo ya existente'}
 
     return jsonify(response)
 
@@ -93,9 +94,9 @@ def signinAdmin():
         if(passw==password):
             response = {'success': 'si entraste'}
         else:
-            response = {'error': 'contraseña o correo invalido'}
+            response = {'Error 404': 'contraseña o correo invalido'}
     else:
-        response = {'error': 'contraseña o correo invalido'}
+        response = {'Error 404': 'contraseña o correo invalido'}
 
     return jsonify(response)
 
@@ -114,7 +115,7 @@ def logonAdmin():
         connection.commit()
         response = {'success': 'cuenta añadida'}
     else:
-        response = {'error': 'correo ya existente'}
+        response = {'Error 409': 'correo ya existente'}
 
     return jsonify(response)
 
@@ -126,7 +127,6 @@ def add_perfiles():
 
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
-    print('simon')
     nombre = request.headers.get('nombre')
     postgreSQL_select_Query = "select * from contenido where nombre ILIKE '%s';"%(nombre)
     cursor.execute(postgreSQL_select_Query)
@@ -140,26 +140,32 @@ def get_contenido():
 @app.route('/api/contenido_generos', methods=['GET'])
 def get_contenido_by_genero():
     genero = request.headers.get('genero')
-    postgreSQL_select_Query = "SELECT c.nombre FROM contenido c JOIN pertenece p on c.id " + "=" +" p.id_contenido WHERE p.nombre_genero ILIKE '%s';"%(genero)
+    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN pertenece p on c.id " + "=" +" p.id_contenido WHERE p.nombre_genero ILIKE '%s';"%(genero)
     cursor.execute(postgreSQL_select_Query)
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
-        new_obj = {'nombre': elements[0]}
+        new_obj = {'nombre': elements[0], 'link' : elements[1]}
         response.append(new_obj)
     return jsonify(response)
 
 @app.route('/api/contenido_actores', methods=['GET'])
 def get_contenido_by_estrella():
     estrella = request.headers.get('estrella')
-    postgreSQL_select_Query = "SELECT c.nombre FROM contenido c JOIN actuan a on c.id " + "=" +" a.id_contenido JOIN estrellas e on a.id_estrella " + "=" + " e.id WHERE e.nombre ILIKE '%s';"%(estrella)
+    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN actuan a on c.id " + "=" +" a.id_contenido JOIN estrellas e on a.id_estrella " + "=" + " e.id WHERE e.nombre ILIKE '%s';"%(estrella)
     cursor.execute(postgreSQL_select_Query)
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
-        new_obj = {'nombre': elements[0]}
+        new_obj = {'nombre': elements[0], 'link' : elements[1]}
         response.append(new_obj)
     return jsonify(response)
+
+@app.route('/api/contenido-premios', methods=['GET'])
+def get_contenido_by_premios():
+    premio = request.headers.get('premio')
+
+    return get_contenido_premios(cursor, premio)
     
 if __name__ == '__main__':
     app.run(debug=True)
