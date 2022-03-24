@@ -136,6 +136,30 @@ def get_contenido():
         new_obj = {'id': elements[0], 'nombre': elements[1], 'fecha_estreno': elements[2], 'id_director': elements[3], 'duracion': elements[4], 'link': elements[5]}
         response.append(new_obj)
     return jsonify(response)
+
+@app.route('/api/contenido_generos', methods=['GET'])
+def get_contenido_by_genero():
+    genero = request.headers.get('genero')
+    postgreSQL_select_Query = "SELECT c.nombre FROM contenido c JOIN pertenece p on c.id " + "=" +" p.id_contenido WHERE p.nombre_genero ILIKE '%s';"%(genero)
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0]}
+        response.append(new_obj)
+    return jsonify(response)
+
+@app.route('/api/contenido_actores', methods=['GET'])
+def get_contenido_by_estrella():
+    estrella = request.headers.get('estrella')
+    postgreSQL_select_Query = "SELECT c.nombre FROM contenido c JOIN actuan a on c.id " + "=" +" a.id_contenido JOIN estrellas e on a.id_estrella " + "=" + " e.id WHERE e.nombre ILIKE '%s';"%(estrella)
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0]}
+        response.append(new_obj)
+    return jsonify(response)
     
 if __name__ == '__main__':
     app.run(debug=True)
