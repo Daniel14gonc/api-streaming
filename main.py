@@ -4,6 +4,7 @@ from config import config
 import psycopg2
 from perfiles import *
 from contenido_premios import *
+from contenido_sugerido import *
 
 connection = psycopg2.connect(user="postgres",
                                   password="ketchup14",
@@ -166,6 +167,12 @@ def get_contenido_by_premios():
     premio = request.headers.get('premio')
 
     return get_contenido_premios(cursor, premio)
+
+@app.route('/api/sugerencias', methods=['GET'])
+def get_sugrencias():
+    premio = request.headers.get('id')
+
+    return get_contenido_sugerido(cursor, premio)
     
 if __name__ == '__main__':
     app.run(debug=True)
