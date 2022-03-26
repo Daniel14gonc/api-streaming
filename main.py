@@ -1,4 +1,5 @@
 from flask import Flask, request, json
+from flask_cors import CORS, cross_origin
 from flask import jsonify
 from config import config
 import psycopg2
@@ -23,6 +24,7 @@ def create_app(enviroment):
 
 enviroment = config['development']
 app = create_app(enviroment)
+cors = CORS(app)
 
 @app.route('/api/directores', methods=['GET'])
 def get_directores():
@@ -44,7 +46,7 @@ def add_directores():
     sql = "INSERT INTO director VALUES('%s', '%s')"
     cursor.execute(sql%tuple(lista))
     connection.commit()
-    response = {'Success 200': 'success'}
+    response = {'message': 'success 200'}
     return jsonify(response)
 
 @app.route('/api/signin', methods=['GET'])
@@ -54,12 +56,13 @@ def signin():
     postgreSQL_select_Query = "SELECT passw FROM cuenta WHERE correo='%s'"%(correo)
     cursor.execute(postgreSQL_select_Query)
     data = cursor.fetchall()
+    response = {'message' : 'error 401'}
     if data:
         passw = data[0][0]
         if(passw==password):
-            response = {'Success 200': 'si entraste'}
+            response = {'message': 'success 200'}
         else:
-            response = {'Error 401' : 'contraseña o correo invalido'}
+            response = {'message' : 'error 409'}
 
     return jsonify(response)
 
@@ -76,9 +79,9 @@ def logon():
         sql = "insert into cuenta values ('%s', '%s', '%s', true, current_timestamp);"
         cursor.execute(sql%tuple(datos))
         connection.commit()
-        response = {'success': 'cuenta añadida'}
+        response = {'message': 'success'}
     else:
-        response = {'Error 409': 'correo ya existente'}
+        response = {'message': 'error 409'}
 
     return jsonify(response)
 
@@ -93,11 +96,11 @@ def signinAdmin():
     if data:
         passw = data[0][0]
         if(passw==password):
-            response = {'success': 'si entraste'}
+            response = {'message': 'success'}
         else:
-            response = {'Error 404': 'contraseña o correo invalido'}
+            response = {'message': 'error 404'}
     else:
-        response = {'Error 404': 'contraseña o correo invalido'}
+        response = {'message': 'error 404'}
 
     return jsonify(response)
 
@@ -114,9 +117,9 @@ def logonAdmin():
         sql = "insert into administrador values ('%s', '%s');"
         cursor.execute(sql%tuple(datos))
         connection.commit()
-        response = {'success': 'cuenta añadida'}
+        response = {'message': 'success'}
     else:
-        response = {'Error 409': 'correo ya existente'}
+        response = {'message': 'error 409'}
 
     return jsonify(response)
 
@@ -125,6 +128,12 @@ def add_perfiles():
     content = request.json
     
     return crear_perfil(connection, cursor, content)
+
+@app.route('/api/perfiles', methods=['GET'])
+def get_perfiles():
+    content = request.headers.get('correo')
+    
+    return get_profiles(cursor, content)
 
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():

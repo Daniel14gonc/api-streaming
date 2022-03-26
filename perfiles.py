@@ -37,6 +37,19 @@ def crear_perfil(connection, cursor, content):
 
     return jsonify(response)
 
+
+def get_profiles(cursor, correo):
+    query = f"select id, nombre from perfiles where correo_cuenta = '{correo}' and activo = true"
+    cursor.execute(query)
+    data = cursor.fetchall()
+    response = []
+    if data:
+        for elements in data:
+            temp_obj = {"id_perfil" : elements[0], "nombre" : elements[1]}
+            response.append(temp_obj)
+    return jsonify(response)
+
+
 def get_cuenta(cursor, correo):
     
     postgreSQL_select_Query = "SELECT tipo_cuenta FROM cuenta WHERE correo='%s'"%(correo)
