@@ -78,6 +78,7 @@ def commit(connection, cursor, data):
     connection.commit()
 
 def actualizar_perfil(cursor, content, connection):
+    print(content)
     if(content['dentro'] == 'false'):
         query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = '%s' AND nombre = '%s'"%(content['dentro'], content['correo'], content['nombre'])
         cursor.execute(query)

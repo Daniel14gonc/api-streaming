@@ -139,7 +139,7 @@ def get_perfiles():
 def update_perfiles():
     content = request.json
     
-    return actualizar_perfil(connection, cursor, content)
+    return actualizar_perfil(cursor, content, connection)
 
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
