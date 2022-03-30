@@ -135,6 +135,12 @@ def get_perfiles():
     
     return get_profiles(cursor, content)
 
+@app.route('/api/perfiles', methods=['PUT'])
+def update_perfiles():
+    content = request.json
+    
+    return actualizar_perfil(connection, cursor, content)
+
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
     nombre = request.headers.get('nombre')
@@ -182,6 +188,7 @@ def get_sugrencias():
     premio = request.headers.get('id')
 
     return get_contenido_sugerido(cursor, premio)
+
     
 if __name__ == '__main__':
     app.run(debug=True)
