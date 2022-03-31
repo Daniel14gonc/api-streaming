@@ -96,5 +96,8 @@ def actualizar_perfil(cursor, content, connection):
             query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = '%s' AND nombre = '%s'"%(content['dentro'], content['correo'], content['nombre'])
             cursor.execute(query)
             connection.commit()
-            response = {"message": "success"}
+            query3 = "SELECT id FROM perfiles WHERE nombre='%s' AND correo_cuenta='%s'"%(content['nombre'], content['correo'])
+            cursor.execute(query3)
+            perfil = cursor.fetchall()
+            response = {"message": perfil[0][0]}
             return jsonify(response)
