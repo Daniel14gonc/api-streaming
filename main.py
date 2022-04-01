@@ -208,8 +208,17 @@ def get_random():
     query = "SELECT nombre, link, imagen FROM contenido ORDER BY random() limit 1"
     cursor.execute(query)
     random = cursor.fetchall()
+    response = {'nombre': random[0][0], 'link' : random[0][1], "imagen":random[0][2]}
+    return jsonify(response)
+
+@app.route('/api/seguirviendo', methods=['GET'])
+def get_seguirviendo():
+    perfil = request.headers.get('id')
+    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=false"%(perfil)
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
     response = []
-    for elements in random:
+    for elements in contenido:
         new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
         response.append(new_obj)
     return jsonify(response)
