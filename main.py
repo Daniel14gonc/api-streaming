@@ -1,3 +1,4 @@
+from random import random
 from flask import Flask, request, json
 from flask_cors import CORS, cross_origin
 from flask import jsonify
@@ -193,12 +194,23 @@ def get_sugrencias():
 @app.route('/api/verdenuevo', methods=['GET'])
 def get_verdenuevo():
     perfil = request.headers.get('id')
-    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=true"%(perfil)
+    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=true"%(perfil)
     cursor.execute(postgreSQL_select_Query)
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
-        new_obj = {'nombre': elements[0], 'link' : elements[1]}
+        new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
+        response.append(new_obj)
+    return jsonify(response)
+
+@app.route('/api/randomcontenido', methods=['GET'])
+def get_random():
+    query = "SELECT nombre, link, imagen FROM contenido ORDER BY random() limit 1"
+    cursor.execute(query)
+    random = cursor.fetchall()
+    response = []
+    for elements in random:
+        new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
         response.append(new_obj)
     return jsonify(response)
 
