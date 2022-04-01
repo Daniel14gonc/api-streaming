@@ -189,6 +189,18 @@ def get_sugrencias():
 
     return get_contenido_sugerido(cursor, premio)
 
-    
+
+@app.route('/api/verdenuevo', methods=['GET'])
+def get_verdenuevo():
+    perfil = request.headers.get('id')
+    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=true"%(perfil)
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0], 'link' : elements[1]}
+        response.append(new_obj)
+    return jsonify(response)
+
 if __name__ == '__main__':
     app.run(debug=True)
