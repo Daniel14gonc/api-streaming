@@ -223,5 +223,16 @@ def get_seguirviendo():
         response.append(new_obj)
     return jsonify(response)
 
+@app.route('/api/all-contenido', methods=['GET'])
+def get_allContent():
+    postgreSQL_select_Query = "SELECT nombre, link, imagen FROM contenido"
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
+        response.append(new_obj)
+    return jsonify(response)
+
 if __name__ == '__main__':
     app.run(debug=True)
