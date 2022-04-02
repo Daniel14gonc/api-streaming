@@ -234,5 +234,43 @@ def get_allContent():
         response.append(new_obj)
     return jsonify(response)
 
+@app.route('/api/favoritos', methods=['GET'])
+def get_favorites():
+    perfil = request.headers.get('id')
+    query = "SELECT c.nombre, c.link, c.imagen FROM contenido c JOIN favoritos f ON c.id = f.id_contenido WHERE id_perfil = '%s';"
+    cursor.execute(query%perfil)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
+        response.append(new_obj)
+    return jsonify(response)
+
+@app.route('/api/favoritos', methods=['POST'])
+def agregar_favoritos():
+    content = request.json
+    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
+    cursor.execute(query)
+    contenido = cursor.fetchall()
+    contenido = contenido[0][0]
+    query1 = "insert into favoritos values('%s', '%s')"%(content['idperfil'],contenido)
+    cursor.execute(query1)
+    cursor.commit()
+    response = {"message": "success"}
+    return jsonify(response)
+
+@app.route('/api/favoritos', methods=['DELETE'])
+def delete_favoritos():
+    content = request.json
+    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
+    cursor.execute(query)
+    contenido = cursor.fetchall()
+    contenido = contenido[0][0]
+    query1 = "DELETE FROM favoritos WHERE id_perfil = '%s' AND id_contenido = '%s'"%(content['idperfil'],contenido)
+    cursor.execute(query1)
+    cursor.commit()
+    response = {"message": "success"}
+    return jsonify(response)
+
 if __name__ == '__main__':
     app.run(debug=True)
