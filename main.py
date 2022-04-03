@@ -272,5 +272,22 @@ def delete_favoritos():
     response = {"message": "success"}
     return jsonify(response)
 
+@app.route('/api/consumo', methods=['POST'])
+def modify_consumo():
+    id = request.headers.get('id_perfil')
+    nombre = request.headers.get('contenido')
+
+    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
+    cursor.execute(query)
+    contenido = cursor.fetchall()
+    id_contenido = contenido[0][0]
+
+    query1 = "INSERT INTO consumo values('%s', '%s', NOW())'"%(id, id_contenido)
+    cursor.execute(query1)
+    cursor.commit()
+    response = {"message": "success"}
+    return jsonify(response)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
