@@ -7,6 +7,7 @@ import psycopg2
 from perfiles import *
 from contenido_premios import *
 from contenido_sugerido import *
+from datetime import datetime
 
 connection = psycopg2.connect(user="postgres",
                                   password="ketchup14",
@@ -255,7 +256,7 @@ def agregar_favoritos():
     contenido = contenido[0][0]
     query1 = "insert into favoritos values('%s', '%s')"%(content['idperfil'],contenido)
     cursor.execute(query1)
-    cursor.commit()
+    connection.commit()
     response = {"message": "success"}
     return jsonify(response)
 
@@ -268,13 +269,13 @@ def delete_favoritos():
     contenido = contenido[0][0]
     query1 = "DELETE FROM favoritos WHERE id_perfil = '%s' AND id_contenido = '%s'"%(content['idperfil'],contenido)
     cursor.execute(query1)
-    cursor.commit()
+    connection.commit()
     response = {"message": "success"}
     return jsonify(response)
 
 @app.route('/api/consumo', methods=['POST'])
 def modify_consumo():
-    id = request.headers.get('id_perfil')
+    id = request.headers.get('id')
     nombre = request.headers.get('contenido')
 
     query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
@@ -282,9 +283,11 @@ def modify_consumo():
     contenido = cursor.fetchall()
     id_contenido = contenido[0][0]
 
-    query1 = "INSERT INTO consumo values('%s', '%s', NOW())'"%(id, id_contenido)
+    time = datetime.now()
+
+    query1 = "INSERT INTO consumo values('%s', '%s', '%s')"%(id, id_contenido, time)
     cursor.execute(query1)
-    cursor.commit()
+    connection.commit()
     response = {"message": "success"}
     return jsonify(response)
 
