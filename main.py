@@ -354,9 +354,39 @@ def actualizar_cuenta():
         datos.append(content[keys])
     cursor = connection.cursor()
     query = "UPDATE cuenta SET tipo_cuenta='%s' WHERE correo='%s'"%(datos[0], datos[1])
-    print(query)
     cursor.execute(query)
     connection.commit()
+    cant = 0
+    if datos[0] == 'basica' :
+        cant = 1
+    elif datos[0] == 'estandar' :
+        cant =4 
+    elif datos[0] == 'avanzada' :
+        cant =8 
+
+    query = f"""select id from perfiles where correo_cuenta = '{datos[1]}' and cast(right(id, 1) as integer) <= {cant} order by cast(right(id, 1) as integer) asc""" 
+    cursor.execute(query)
+    data = cursor.fetchall()
+    stored = []
+    for elementos in data:
+        stored.append(elementos[0])
+    
+    for elementos in stored:
+        query = f"update perfiles set activo=true where id='{elementos}'"
+        cursor.execute(query)
+
+    query = f"""select id from perfiles where correo_cuenta = '{datos[1]}' and cast(right(id, 1) as integer) > {cant} order by cast(right(id, 1) as integer) asc""" 
+    cursor.execute(query)
+    data = cursor.fetchall()
+    stored = []
+    for elementos in data:
+        stored.append(elementos[0])
+    
+    for elementos in stored:
+        query = f"update perfiles set activo=false where id='{elementos}'"
+        cursor.execute(query)
+    connection.commit()
+
     response = {"message": "success"}
     return jsonify(response)
 
