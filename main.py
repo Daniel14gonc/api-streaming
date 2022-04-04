@@ -146,12 +146,27 @@ def update_perfiles():
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
     nombre = request.headers.get('nombre')
-    postgreSQL_select_Query = "select * from contenido where nombre ILIKE '%s';"%(nombre)
-    cursor.execute(postgreSQL_select_Query)
+
+    megaQuery = f'''select nombre, link, imagen from contenido where nombre ILIKE '%{nombre}%'
+                    union
+                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN pertenece p on c.id = p.id_contenido WHERE p.nombre_genero ILIKE '%{nombre}%'
+                    union
+                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN actuan a on c.id = a.id_contenido JOIN estrellas e on a.id_estrella = e.id WHERE e.nombre ILIKE '%{nombre}%'
+                    union
+                    select distinct(c.nombre), c.link, c.imagen from premiacion p join contenido c on c.id = p.id_contenido where p.nombre_premio ILIKE '%{nombre}%' 
+                    union
+                    select nombre, link, imagen from contenido where cast(fecha_estreno as varchar) like '%{nombre}%'
+                    union
+                    select distinct(p.nombre), p.link, p.imagen from director d join contenido p on d.id=p.id_director 
+                    where d.nombre ilike '%{nombre}%';
+
+    '''
+
+    cursor.execute(megaQuery)
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
-        new_obj = {'id': elements[0], 'nombre': elements[1], 'fecha_estreno': elements[2], 'id_director': elements[3], 'duracion': elements[4], 'link': elements[5]}
+        new_obj = {'nombre': elements[0], 'link' : elements[1], "imagen":elements[2]}
         response.append(new_obj)
     return jsonify(response)
 
