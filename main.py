@@ -291,6 +291,33 @@ def modify_consumo():
     response = {"message": "success"}
     return jsonify(response)
 
+@app.route('/api/pelicula', methods=['POST'])
+def agregar_visto():
+    content = request.json
+    query = "SELECT id FROM contenido WHERE nombre  = '%s'"%(content['nombre'])
+    cursor.execute(query)
+    data = cursor.fetchall()
+    query2 = "SELECT * FROM visto WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0], content['id'])
+    cursor.execute(query2)
+    datos = cursor.fetchall()
+    if(datos):
+        query3 = "UPDATE visto SET terminado = false WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0], content['id'])
+        cursor.execute(query3)
+        connection.commit()
+    else:
+        query4 = "INSERT INTO visto VALUES ('%s', '%s', false)"%(data[0], content['id'])
+        cursor.execute(query4)
+
+
+@app.route('/api/pelicula', methods=['PUT'])
+def modify_visto():
+    id = request.headers.get('id')
+    nombre = request.headers.get('nombre')
+
+    query = "SELECT id FROM contenido WHERE nombre = '%'"%nombre
+    cursor.execute(query)
+    id_conteido = cursor.fetchall()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
