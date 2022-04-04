@@ -294,20 +294,23 @@ def modify_consumo():
 @app.route('/api/pelicula', methods=['POST'])
 def agregar_visto():
     content = request.json
-    query = "SELECT id FROM contenido WHERE nombre  = '%s'"%(content['nombre'])
+    print(content)
+    cursor = connection.cursor()
+    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
     cursor.execute(query)
     data = cursor.fetchall()
-    query2 = "SELECT * FROM visto WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0], content['id'])
+    query2 = "SELECT * FROM visto WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0][0], content['id'])
     cursor.execute(query2)
     datos = cursor.fetchall()
     if(datos):
-        query3 = "UPDATE visto SET terminado = false WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0], content['id'])
+        query3 = "UPDATE visto SET terminado = false WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0][0], content['id'])
         cursor.execute(query3)
         connection.commit()
     else:
-        query4 = "INSERT INTO visto VALUES ('%s', '%s', false)"%(data[0], content['id'])
+        query4 = "INSERT INTO visto VALUES ('%s', '%s', false)"%(content['id'], data[0][0])
         cursor.execute(query4)
-
+        connection.commit()
+    return jsonify({'message': 'success'})
 
 @app.route('/api/pelicula', methods=['PUT'])
 def modify_visto():
