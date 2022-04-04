@@ -337,5 +337,30 @@ def modify_visto():
     cursor.execute(query)
     return jsonify({'message': 'success'})
 
+@app.route('/api/ajustecuenta', methods=['GET'])
+def ajustar_cuenta():
+    correo = request.headers.get("correo")
+    query = "SELECT tipo_cuenta FROM cuenta WHERE correo='%s';"%correo
+    cursor.execute(query)
+    tipo = cursor.fetchall()
+    response = {"tipo": tipo[0][0]}
+    return jsonify(response)
+
+@app.route('/api/ajustecuenta', methods=['PUT'])
+def actualizar_cuenta():
+    content = request.json
+    datos = []
+    for keys in content:
+        datos.append(content[keys])
+    cursor = connection.cursor()
+    query = "UPDATE cuenta SET tipo_cuenta='%s' WHERE correo='%s'"%(datos[0], datos[1])
+    print(query)
+    cursor.execute(query)
+    connection.commit()
+    response = {"message": "success"}
+    return jsonify(response)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
