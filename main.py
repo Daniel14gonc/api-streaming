@@ -340,6 +340,7 @@ def modify_visto():
 def ajustar_cuenta():
     correo = request.headers.get("correo")
     query = "SELECT tipo_cuenta FROM cuenta WHERE correo='%s';"%correo
+    print(query)
     cursor.execute(query)
     tipo = cursor.fetchall()
     response = {"tipo": tipo[0][0]}
