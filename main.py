@@ -292,7 +292,6 @@ def delete_favoritos():
 def modify_consumo():
     id = request.headers.get('id')
     nombre = request.headers.get('contenido')
-
     query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
     cursor.execute(query)
     contenido = cursor.fetchall()
@@ -352,7 +351,6 @@ def actualizar_cuenta():
     datos = []
     for keys in content:
         datos.append(content[keys])
-    cursor = connection.cursor()
     query = "UPDATE cuenta SET tipo_cuenta='%s' WHERE correo='%s'"%(datos[0], datos[1])
     cursor.execute(query)
     connection.commit()
