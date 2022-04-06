@@ -389,7 +389,29 @@ def actualizar_cuenta():
     response = {"message": "success"}
     return jsonify(response)
 
+@app.route('/api/anuncio', methods=['GET'])
+def get_anuncio():
+    postgreSQL_select_Query = "SELECT id, link FROM anuncios order by random() limit 1; "
+    cursor.execute(postgreSQL_select_Query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'id': elements[0], 'link' : elements[1]}
+        response.append(new_obj)
+    
+    nombre = request.headers.get('nombre')
+    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
+    cursor.execute(query)
+    contenido = cursor.fetchall()
+    id_contenido = contenido[0][0]
 
+
+    time = datetime.now()
+    query1 = "INSERT INTO regis_anun values('%s', '%s', '%s')"%(id_contenido, response[0]['id'], time)
+    cursor.execute(query1)
+    connection.commit()
+
+    return jsonify({'link': response[0]['link']})
 
 if __name__ == '__main__':
     app.run(debug=True)
