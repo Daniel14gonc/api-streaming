@@ -7,6 +7,7 @@ import psycopg2
 from perfiles import *
 from contenido_premios import *
 from contenido_sugerido import *
+from admin import *
 from datetime import datetime
 
 connection = psycopg2.connect(user="postgres",
@@ -412,6 +413,35 @@ def get_anuncio():
     connection.commit()
 
     return jsonify({'link': response[0]['link']})
+
+@app.route('/api/admin_getCuenta', methods=['GET'])
+def admin_GetCuenta():
+    
+    return admin_getCuenta(cursor)
+
+@app.route('/api/admin_Activado', methods=['PUT'])
+def admin_Activado():
+    content = request.json
+
+    return admin_activado(cursor, content, connection)
+
+@app.route('/api/admin_getEstrellas', methods=['GET'])
+def admin_GetEstrellas():
+    return admin_getestrellas(cursor)
+
+
+@app.route('/api/admin_getAnunciantes', methods=['GET'])
+def admin_GetAnunciantes():
+    return admin_getanunciantes(cursor)
+
+
+@app.route('/api/admin_getAnuncios', methods=['GET'])
+def admin_GetAnuncios():
+    return admin_getanuncios(cursor)
+
+@app.route('/api/admin_getCont', methods=['GET'])
+def admin_GetCont():
+    return admin_getcont(cursor)
 
 if __name__ == '__main__':
     app.run(debug=True)
