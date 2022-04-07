@@ -17,11 +17,12 @@ def admin_activado(cursor, content, connection):
     cursor.execute(query1)
     valor = cursor.fetchall()
     if(valor[0][0]==True):
-        query = "update cuenta set activo = False where correo='%s';"%(content['correo'])
+        query = "update cuenta set activo = false where correo='%s';"%(content['correo'])
         cursor.execute(query)
     else:
-        query = "update cuenta set activo = True where correo='%s';"%(content['correo'])
+        query = "update cuenta set activo = true where correo='%s';"%(content['correo'])
         cursor.execute(query)
+    connection.commit()
 
     return jsonify({'message': 'success'})
 
