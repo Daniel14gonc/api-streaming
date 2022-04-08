@@ -27,12 +27,12 @@ def admin_activado(cursor, content, connection):
     return jsonify({'message': 'success'})
 
 def admin_getestrellas(cursor):
-    query = "SELECT nombre FROM estrellas order by nombre;"
+    query = "SELECT id, nombre FROM estrellas order by nombre;"
     cursor.execute(query)
     cuentas = cursor.fetchall()
     response = []
     for elements in cuentas:
-        new_obj = {'nombre': elements[0]}
+        new_obj = {'id': elements[0], 'nombre': elements[1]}
         response.append(new_obj)
     return jsonify(response)
 
@@ -47,7 +47,7 @@ def admin_getanunciantes(cursor):
     return jsonify(response)
 
 def admin_getanuncios(cursor):
-    query = "SELECT id, id_anunciante FROM anuncios order by id;"
+    query = "SELECT a.id, an.nombre, an.id FROM anuncios a join anunciante an on a.id_anunciante = an.id order by a.id;"
     cursor.execute(query)
     cuentas = cursor.fetchall()
     response = []
@@ -65,3 +65,31 @@ def admin_getcont(cursor):
         new_obj = {'nombre': elements[0]}
         response.append(new_obj)
     return jsonify(response)
+
+def edit_star(connection, cursor, content):
+    query = "UPDATE estrellas SET nombre = '%s' where id='%s';"%(content['nombre'], content['id'])
+    cursor.execute(query)
+    connection.commit()
+    
+    return jsonify({'message': 'success'})
+
+
+def change_anunciante(connection, cursor, content):
+    query = "SELECT id FROM anunciante where nombre = '%s';"%(content['anunciante'])
+    cursor.execute(query)
+    datos = cursor.fetchall()
+    ida = datos[0][0]
+
+    query = "UPDATE anuncios set id_anunciante = '%s' where id='%s'"%(ida, content['id'])
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})
+
+def delete_anuncios(connection, cursor, id):
+
+    query = "DELETE FROM anuncios WHERE id = '%s';"%(id)
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})

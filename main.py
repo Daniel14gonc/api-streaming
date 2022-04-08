@@ -56,7 +56,7 @@ def add_directores():
 def signin():
     correo = request.headers.get('correo')
     password = request.headers.get('password')
-    postgreSQL_select_Query = "SELECT passw FROM cuenta WHERE correo='%s'"%(correo)
+    postgreSQL_select_Query = "SELECT passw FROM cuenta WHERE correo='%s' and activo = true"%(correo)
     cursor.execute(postgreSQL_select_Query)
     data = cursor.fetchall()
     response = {'message' : 'error 401'}
@@ -442,6 +442,21 @@ def admin_GetAnuncios():
 @app.route('/api/admin_getCont', methods=['GET'])
 def admin_GetCont():
     return admin_getcont(cursor)
+
+@app.route('/api/stars', methods=['PUT'])
+def admin_edistar():
+    content = request.json
+    return edit_star(connection, cursor, content)
+
+@app.route('/api/anuncios', methods=['PUT'])
+def change_anun():
+    content = request.json
+    return change_anunciante(connection, cursor, content)
+
+@app.route('/api/anuncios', methods=['DELETE'])
+def delete_anun():
+    content = request.headers.get('id')
+    return delete_anuncios(connection, cursor, content)
 
 if __name__ == '__main__':
     app.run(debug=True)
