@@ -116,3 +116,45 @@ def delete_anunciante(connection, cursor, nombre):
     connection.commit()
 
     return jsonify({'message': 'success'})
+
+def get_premios(cursor):
+    query = "SELECT * FROM premios;"
+    cursor.execute(query)
+    data = cursor.fetchall()
+    response = []
+    for elements in data:
+        new_obj = {'nombre': elements[0]}
+        response.append(new_obj)
+
+    return jsonify(response)
+
+
+def crear_pelicula(connection, cursor, content):
+    content = content['data']
+    list = []
+    for elements in content:
+        list.append(elements)
+  
+  
+    query = "SELECT id FROM director WHERE nombre='%s';"%(list[2])
+    cursor.execute(query)
+    id_d = cursor.fetchall()[0][0]
+    
+    query = "SELECT COUNT(*) FROM contenido;"
+    cursor.execute(query)
+    id = int(cursor.fetchall()[0][0]) + 1
+    
+    query = "INSERT INTO contenido VALUES ('%s', '%s', '%s', '%s', %s, '%s', '%s');"%(id, list[0], list[1], id_d, list[3], list[4], list[5])
+    cursor.execute(query)
+    connection.commit()
+
+    for elements in list[6]:
+        query = "SELECT id FROM estrellas WHERE nombre='%s';"%(elements)
+        cursor.execute(query)
+        id_e = cursor.fetchall()[0][0]
+        
+        query = "INSERT INTO actuan VALUES ('%s' , '%s');"%(id, id_e)
+        cursor.execute(query)
+        connection.commit()
+
+    return jsonify({'message':'success'})

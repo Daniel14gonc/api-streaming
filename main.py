@@ -474,5 +474,14 @@ def delete_nunciante():
     print(nombre)
     return delete_anunciante(connection, cursor, nombre)
 
+@app.route('/api/premios', methods=['GET'])
+def get_Premios():
+    return get_premios(cursor)
+
+@app.route('/api/movie', methods=['POST'])
+def create_Film():
+    content = request.json
+    return crear_pelicula(connection, cursor, content)
+
 if __name__ == '__main__':
     app.run(debug=True)
