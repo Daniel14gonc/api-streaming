@@ -93,3 +93,26 @@ def delete_anuncios(connection, cursor, id):
     connection.commit()
 
     return jsonify({'message': 'success'})
+
+def change_correo(connection, cursor, content):
+    print(content)
+    query = "UPDATE cuenta set correo = '%s' where correo='%s'"%(content['new'], content['old'] )
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})
+
+def change_anunciante2(connection, cursor, content):
+    query = "UPDATE anunciante set nombre = '%s' where nombre='%s'"%(content['new'], content['old'])
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})
+
+def delete_anunciante(connection, cursor, nombre):
+    query = "DELETE FROM anunciante WHERE nombre = '%s';"%(nombre)
+    print(query)
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})

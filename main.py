@@ -458,5 +458,21 @@ def delete_anun():
     content = request.headers.get('id')
     return delete_anuncios(connection, cursor, content)
 
+@app.route('/api/cuentas', methods=['PUT'])
+def change_corre():
+    content = request.json
+    return change_correo(connection, cursor, content)
+
+@app.route('/api/anunciante', methods=['PUT'])
+def change_nunciante():
+    content = request.json
+    return change_anunciante2(connection, cursor, content)
+
+@app.route('/api/anunciante', methods=['DELETE'])
+def delete_nunciante():
+    nombre = request.headers.get('nombre')
+    print(nombre)
+    return delete_anunciante(connection, cursor, nombre)
+
 if __name__ == '__main__':
     app.run(debug=True)
