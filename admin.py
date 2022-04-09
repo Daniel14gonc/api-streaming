@@ -203,3 +203,7 @@ def crear_anuncio(connection, cursor, content):
     connection.commit()
 
     return jsonify({'message':'success'})
+
+def get_todo(cursor, connection, nombre):
+
+    query = "SELECT id, duracion,  FROM contenido WHERE nombre = '%s'"%(nombre)
