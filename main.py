@@ -498,5 +498,10 @@ def create_ANUNCIo():
     content = request.json
     return crear_anuncio(connection, cursor, content)
 
+@app.route('/api/editPelis', methods=['GET'])
+def get_todito():
+    nombre = request.headers.get('nombre')
+    return get_todopeli(nombre, cursor)
+
 if __name__ == '__main__':
     app.run(debug=True)

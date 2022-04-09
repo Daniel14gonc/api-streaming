@@ -204,6 +204,12 @@ def crear_anuncio(connection, cursor, content):
 
     return jsonify({'message':'success'})
 
-def get_todo(cursor, connection, nombre):
-
-    query = "SELECT id, duracion,  FROM contenido WHERE nombre = '%s'"%(nombre)
+def get_todopeli(nombre, cursor):
+    query = "select d.nombre , c.duracion, c.link, c.imagen from contenido c join director d on d.id=c.id_director where c.nombre='%s';"%(nombre)
+    cursor.execute(query)
+    contenido = cursor.fetchall()
+    response = []
+    for elements in contenido:
+        new_obj = {'nombre': elements[0], 'duracion' : elements[1],'link' : elements[2],'imagen' : elements[3]}
+        response.append(new_obj)
+    return jsonify(response)
