@@ -503,5 +503,10 @@ def get_todito():
     nombre = request.headers.get('nombre')
     return get_todopeli(nombre, cursor)
 
+@app.route('/api/editPelis', methods=['PUT'])
+def update_todito():
+    content = request.json
+    return update_peli(cursor, connection, content)
+
 if __name__ == '__main__':
     app.run(debug=True)

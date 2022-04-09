@@ -207,9 +207,19 @@ def crear_anuncio(connection, cursor, content):
 def get_todopeli(nombre, cursor):
     query = "select d.nombre , c.duracion, c.link, c.imagen from contenido c join director d on d.id=c.id_director where c.nombre='%s';"%(nombre)
     cursor.execute(query)
-    contenido = cursor.fetchall()
-    response = []
-    for elements in contenido:
-        new_obj = {'nombre': elements[0], 'duracion' : elements[1],'link' : elements[2],'imagen' : elements[3]}
-        response.append(new_obj)
+    elements = cursor.fetchall()
+    response = {'nombre': elements[0][0], 'duracion' : elements[0][1],'link' : elements[0][2],'imagen' : elements[0][3]}
     return jsonify(response)
+
+def update_peli(cursor, connection, content):
+    content = content['data']
+
+    query1 = "SELECT id FROM director WHERE nombre = '%s'"%(content[1])
+    cursor.execute(query1)
+    id = cursor.fetchall()[0][0]
+
+    query = "UPDATE contenido SET nombre = '%s', id_director = '%s', duracion = '%s', link = '%s', imagen = '%s' WHERE nombre = '%s'"%(content[0], id, content[2], content[3], content[4], content[5])
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({"message":"success"})
