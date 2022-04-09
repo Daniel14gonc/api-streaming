@@ -140,7 +140,7 @@ def crear_pelicula(connection, cursor, content):
     cursor.execute(query)
     id_d = cursor.fetchall()[0][0]
     
-    query = "SELECT COUNT(*) FROM contenido;"
+    query = "SELECT id FROM contenido order by id desc limit 1;"
     cursor.execute(query)
     id = int(cursor.fetchall()[0][0]) + 1
     
@@ -156,5 +156,50 @@ def crear_pelicula(connection, cursor, content):
         query = "INSERT INTO actuan VALUES ('%s' , '%s');"%(id, id_e)
         cursor.execute(query)
         connection.commit()
+
+    return jsonify({'message':'success'})
+
+def delete_contenido(connection, cursor, nombre):
+    query = "DELETE FROM contenido WHERE nombre = '%s';"%(nombre)
+    cursor.execute(query)
+    connection.commit()
+
+    return jsonify({'message': 'success'})
+
+
+def crear_anunciante(connection, cursor, content):
+    content = content['data']
+
+
+    query = "SELECT id FROM anunciante order by id desc limit 1;"
+    cursor.execute(query)
+    id = int(cursor.fetchall()[0][0]) + 1
+  
+    query = "insert into anunciante values ('%s' , '%s');"%(id,content)
+    cursor.execute(query)
+
+    connection.commit()
+
+    return jsonify({'message':'success'})
+
+def crear_anuncio(connection, cursor, content):
+    link = content['link']
+    anunciante = content['anunciante']
+
+    query = "SELECT id FROM anunciante where nombre='%s';"%(anunciante)
+    cursor.execute(query)
+    id_anun = cursor.fetchall()[0][0]
+
+    query = "SELECT id FROM anuncios order by id desc limit 1;"
+    cursor.execute(query)
+    id = int(cursor.fetchall()[0][0]) + 1
+
+    if(id<10):
+        id="0"+str(id)
+  
+    query = "insert into anuncios values ('%s' , '%s', '%s');"%(id,id_anun, link)
+    cursor.execute(query)
+
+    connection.commit()
 
     return jsonify({'message':'success'})

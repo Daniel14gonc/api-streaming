@@ -483,5 +483,20 @@ def create_Film():
     content = request.json
     return crear_pelicula(connection, cursor, content)
 
+@app.route('/api/contenido', methods=['DELETE'])
+def delete_ontenido():
+    nombre = request.headers.get('nombre')
+    return delete_contenido(connection, cursor, nombre)
+
+@app.route('/api/anunciantes', methods=['POST'])
+def create_ANUNCIANTE():
+    content = request.json
+    return crear_anunciante(connection, cursor, content)
+
+@app.route('/api/anuncio', methods=['POST'])
+def create_ANUNCIo():
+    content = request.json
+    return crear_anuncio(connection, cursor, content)
+
 if __name__ == '__main__':
     app.run(debug=True)
