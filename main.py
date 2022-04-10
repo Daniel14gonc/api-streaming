@@ -540,5 +540,10 @@ def getCant():
 
     return get_Cant(cursor)
 
+@app.route('/api/pico', methods=['GET'])
+def getPico():
+    fechaI = request.headers.get('fechaI')
+    return get_hora(cursor, fechaI)
+
 if __name__ == '__main__':
     app.run(debug=True)

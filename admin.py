@@ -308,3 +308,17 @@ def get_Cant(cursor):
     return jsonify(cant)
 
 
+def get_hora(cursor, fecha):
+    
+    query=f"""
+        select hora from (
+            select extract(hour from c.fecha_visualizacion) as hora, count(*)  from consumo c 
+            where c.fecha_visualizacion between '{fecha}' and '{fecha} 23:59:59.999'
+            group by extract(hour from c.fecha_visualizacion) order by count(*) desc limit 1) as tabla;
+    """
+    cursor.execute(query)
+    cant = cursor.fetchall()[0][0]
+
+    return jsonify({'hora' : cant})
+
+
