@@ -223,3 +223,88 @@ def update_peli(cursor, connection, content):
     connection.commit()
 
     return jsonify({"message":"success"})
+
+def get_10gen(fechaI, fechaF, cursor):
+    query="""select p.nombre_genero, sum(c2.duracion)
+    from consumo c
+    join  contenido c2 on c.id_contenido = c2.id
+    join pertenece p on p.id_contenido = c2.id
+    where c.fecha_visualizacion>='%s' and c.fecha_visualizacion<='%s'
+    group by p.nombre_genero
+    order by sum(c2.duracion) desc  limit 10;"""%(fechaI, fechaF)
+
+    cursor.execute(query)
+    generos = cursor.fetchall()
+    response=[]
+    for elements in generos:
+        obj = {'genero': elements[0], 'conteo' : elements[1]}
+        response.append(obj)
+
+    return jsonify(response)
+
+def get_Reprod(fechaI, fechaF, cuenta, cursor):
+    query="""
+    select p.nombre_genero, count(*) from consumo c join pertenece p on c.id_contenido = p.id_contenido
+    join perfiles p2 on c.id_perfil = p2.id join cuenta c2 on c2.correo = p2.correo_cuenta
+    where c2.tipo_cuenta = '%s' and
+    c.fecha_visualizacion>='%s' and c.fecha_visualizacion<='%s'
+    group by p.nombre_genero;
+    """%(cuenta, fechaI, fechaF)
+
+    cursor.execute(query)
+    cuentas = cursor.fetchall()
+    response=[]
+    for elements in cuentas:
+        obj = {'cuenta': elements[0], 'conteo' : elements[1]}
+        response.append(obj)
+
+    return jsonify(response)
+
+def get_Directo(cursor):
+    query="""
+        select distinct(director) from (
+        select c2.id, c2.nombre, d.nombre as director, count(*) from visto v join perfiles p on v.id_perfil = p.id 
+        join cuenta c on c.correo = p.correo_cuenta
+        join contenido c2 on v.id_contenido = c2.id
+        join director d on d.id = c2.id_director 
+        where c.tipo_cuenta != 'basica' group by c2.id, d.nombre order by count(*) desc limit 10) as tabla;
+    """
+    cursor.execute(query)
+    cuentas = cursor.fetchall()
+    response=[]
+    for elements in cuentas:
+        obj = {'nombre': elements[0]}
+        response.append(obj)
+
+    return jsonify(response)
+
+def get_Acto(cursor):
+    query="""
+        select distinct(e.nombre) from actuan a join estrellas e on e.id = a.id_estrella  where a.id_contenido in (
+            select id from (
+                select v.id_contenido as id, count(*) from visto v join perfiles p on v.id_perfil = p.id 
+                join cuenta c on c.correo = p.correo_cuenta
+                where c.tipo_cuenta != 'basica' group by v.id_contenido order by count(*) desc limit 10
+            ) as top
+        );
+    """
+    cursor.execute(query)
+    cuentas = cursor.fetchall()
+    response=[]
+    for elements in cuentas:
+        obj = {'nombre': elements[0]}
+        response.append(obj)
+
+    return jsonify(response)
+
+def get_Cant(cursor):
+    query="""
+    select count(*) from cuenta where fecha_creacion >= to_char(CURRENT_DATE - INTERVAL '6 months', 'YYYY-MM-01')::date
+    and tipo_cuenta = 'avanzada';
+    """
+    cursor.execute(query)
+    cant = cursor.fetchall()[0][0]
+
+    return jsonify(cant)
+
+

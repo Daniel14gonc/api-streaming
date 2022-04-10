@@ -508,5 +508,37 @@ def update_todito():
     content = request.json
     return update_peli(cursor, connection, content)
 
+@app.route('/api/Top10gen', methods=['GET'])
+def get10gen():
+    fechaI = request.headers.get('fechaI')
+    fechaF = request.headers.get('fechaF')
+
+
+    return get_10gen(fechaI, fechaF, cursor)
+
+@app.route('/api/Reprod', methods=['GET'])
+def getReprod():
+    cuenta = request.headers.get('cuenta')
+    fechaI = request.headers.get('fechaI')
+    fechaF = request.headers.get('fechaF')
+
+
+    return get_Reprod(fechaI, fechaF, cuenta, cursor)
+
+@app.route('/api/Directo', methods=['GET'])
+def getDirecto():
+
+    return get_Directo(cursor)
+
+@app.route('/api/Acto', methods=['GET'])
+def getActo():
+
+    return get_Acto(cursor)
+
+@app.route('/api/Cant', methods=['GET'])
+def getCant():
+
+    return get_Cant(cursor)
+
 if __name__ == '__main__':
     app.run(debug=True)
