@@ -13,15 +13,15 @@ def admin_getCuenta(cursor):
     return jsonify(response)
 
 def admin_activado(cursor, content, connection):
-    query1 = "select activo from cuenta where correo='%s';"%(content['correo'])
-    cursor.execute(query1)
+    query1 = "select activo from cuenta where correo=%s;"
+    cursor.execute(query1, [content['correo']])
     valor = cursor.fetchall()
     if(valor[0][0]==True):
-        query = "update cuenta set activo = false where correo='%s';"%(content['correo'])
-        cursor.execute(query)
+        query = "update cuenta set activo = false where correo=%s;"
+        cursor.execute(query, [content['correo']])
     else:
-        query = "update cuenta set activo = true where correo='%s';"%(content['correo'])
-        cursor.execute(query)
+        query = "update cuenta set activo = true where correo=%s;"
+        cursor.execute(query, [content['correo']])
     connection.commit()
 
     return jsonify({'message': 'success'})
@@ -67,51 +67,51 @@ def admin_getcont(cursor):
     return jsonify(response)
 
 def edit_star(connection, cursor, content):
-    query = "UPDATE estrellas SET nombre = '%s' where id='%s';"%(content['nombre'], content['id'])
-    cursor.execute(query)
+    query = "UPDATE estrellas SET nombre = %s where id=%s;"
+    cursor.execute(query, [content['nombre'], content['id']])
     connection.commit()
     
     return jsonify({'message': 'success'})
 
 
 def change_anunciante(connection, cursor, content):
-    query = "SELECT id FROM anunciante where nombre = '%s';"%(content['anunciante'])
-    cursor.execute(query)
+    query = "SELECT id FROM anunciante where nombre = %s;"
+    cursor.execute(query, [content['anunciante']])
     datos = cursor.fetchall()
     ida = datos[0][0]
 
-    query = "UPDATE anuncios set id_anunciante = '%s' where id='%s'"%(ida, content['id'])
-    cursor.execute(query)
+    query = "UPDATE anuncios set id_anunciante = %s where id=%s"
+    cursor.execute(query, [ida, content['id']])
     connection.commit()
 
     return jsonify({'message': 'success'})
 
 def delete_anuncios(connection, cursor, id):
 
-    query = "DELETE FROM anuncios WHERE id = '%s';"%(id)
-    cursor.execute(query)
+    query = "DELETE FROM anuncios WHERE id = %s;"
+    cursor.execute(query, [id])
     connection.commit()
 
     return jsonify({'message': 'success'})
 
 def change_correo(connection, cursor, content):
     print(content)
-    query = "UPDATE cuenta set correo = '%s' where correo='%s'"%(content['new'], content['old'] )
-    cursor.execute(query)
+    query = "UPDATE cuenta set correo = %s where correo=%s;"
+    cursor.execute(query, [content['new'], content['old']])
     connection.commit()
 
     return jsonify({'message': 'success'})
 
 def change_anunciante2(connection, cursor, content):
-    query = "UPDATE anunciante set nombre = '%s' where nombre='%s'"%(content['new'], content['old'])
-    cursor.execute(query)
+    query = "UPDATE anunciante set nombre = %s where nombre=%s;"
+    cursor.execute(query, [content['new'], content['old']])
     connection.commit()
 
     return jsonify({'message': 'success'})
 
 def delete_anunciante(connection, cursor, nombre):
-    query = "DELETE FROM anunciante WHERE nombre = '%s';"%(nombre)
-    print(query)
+    query = "DELETE FROM anunciante WHERE nombre = %s;"
+    print(query, [nombre])
     cursor.execute(query)
     connection.commit()
 
@@ -136,32 +136,32 @@ def crear_pelicula(connection, cursor, content):
         list.append(elements)
   
   
-    query = "SELECT id FROM director WHERE nombre='%s';"%(list[2])
-    cursor.execute(query)
+    query = "SELECT id FROM director WHERE nombre=%s;"
+    cursor.execute(query, list[2])
     id_d = cursor.fetchall()[0][0]
     
     query = "SELECT id FROM contenido order by id desc limit 1;"
     cursor.execute(query)
     id = int(cursor.fetchall()[0][0]) + 1
     
-    query = "INSERT INTO contenido VALUES ('%s', '%s', '%s', '%s', %s, '%s', '%s');"%(id, list[0], list[1], id_d, list[3], list[4], list[5])
-    cursor.execute(query)
+    query = "INSERT INTO contenido VALUES (%s, %s, %s, %s, %s, %s, %s);"
+    cursor.execute(query, [id, list[0], list[1], id_d, list[3], list[4], list[5]])
     connection.commit()
 
     for elements in list[6]:
-        query = "SELECT id FROM estrellas WHERE nombre='%s';"%(elements)
-        cursor.execute(query)
+        query = "SELECT id FROM estrellas WHERE nombre=%s;"
+        cursor.execute(query, [elements])
         id_e = cursor.fetchall()[0][0]
         
-        query = "INSERT INTO actuan VALUES ('%s' , '%s');"%(id, id_e)
-        cursor.execute(query)
+        query = "INSERT INTO actuan VALUES (%s , %s);"
+        cursor.execute(query, [id, id_e])
         connection.commit()
 
     return jsonify({'message':'success'})
 
 def delete_contenido(connection, cursor, nombre):
-    query = "DELETE FROM contenido WHERE nombre = '%s';"%(nombre)
-    cursor.execute(query)
+    query = "DELETE FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [nombre])
     connection.commit()
 
     return jsonify({'message': 'success'})
@@ -175,8 +175,8 @@ def crear_anunciante(connection, cursor, content):
     cursor.execute(query)
     id = int(cursor.fetchall()[0][0]) + 1
   
-    query = "insert into anunciante values ('%s' , '%s');"%(id,content)
-    cursor.execute(query)
+    query = "insert into anunciante values (%s, %s);"
+    cursor.execute(query, [id,content])
 
     connection.commit()
 
@@ -186,8 +186,8 @@ def crear_anuncio(connection, cursor, content):
     link = content['link']
     anunciante = content['anunciante']
 
-    query = "SELECT id FROM anunciante where nombre='%s';"%(anunciante)
-    cursor.execute(query)
+    query = "SELECT id FROM anunciante where nombre=%s;"
+    cursor.execute(query, [anunciante])
     id_anun = cursor.fetchall()[0][0]
 
     query = "SELECT id FROM anuncios order by id desc limit 1;"
@@ -197,16 +197,16 @@ def crear_anuncio(connection, cursor, content):
     if(id<10):
         id="0"+str(id)
   
-    query = "insert into anuncios values ('%s' , '%s', '%s');"%(id,id_anun, link)
-    cursor.execute(query)
+    query = "insert into anuncios values (%s , %s, %s);"
+    cursor.execute(query, [id,id_anun, link])
 
     connection.commit()
 
     return jsonify({'message':'success'})
 
 def get_todopeli(nombre, cursor):
-    query = "select d.nombre , c.duracion, c.link, c.imagen from contenido c join director d on d.id=c.id_director where c.nombre='%s';"%(nombre)
-    cursor.execute(query)
+    query = "select d.nombre , c.duracion, c.link, c.imagen from contenido c join director d on d.id=c.id_director where c.nombre=%s;"
+    cursor.execute(query, [nombre])
     elements = cursor.fetchall()
     response = {'nombre': elements[0][0], 'duracion' : elements[0][1],'link' : elements[0][2],'imagen' : elements[0][3]}
     return jsonify(response)
@@ -214,12 +214,12 @@ def get_todopeli(nombre, cursor):
 def update_peli(cursor, connection, content):
     content = content['data']
 
-    query1 = "SELECT id FROM director WHERE nombre = '%s'"%(content[1])
-    cursor.execute(query1)
+    query1 = "SELECT id FROM director WHERE nombre = %s"
+    cursor.execute(query1, [content[1]])
     id = cursor.fetchall()[0][0]
 
-    query = "UPDATE contenido SET nombre = '%s', id_director = '%s', duracion = '%s', link = '%s', imagen = '%s' WHERE nombre = '%s'"%(content[0], id, content[2], content[3], content[4], content[5])
-    cursor.execute(query)
+    query = "UPDATE contenido SET nombre = %s, id_director = %s, duracion = %s, link = %s, imagen = %s WHERE nombre = %s;"
+    cursor.execute(query, [content[0], id, content[2], content[3], content[4], content[5]])
     connection.commit()
 
     return jsonify({"message":"success"})
@@ -229,11 +229,11 @@ def get_10gen(fechaI, fechaF, cursor):
     from consumo c
     join  contenido c2 on c.id_contenido = c2.id
     join pertenece p on p.id_contenido = c2.id
-    where c.fecha_visualizacion>='%s' and c.fecha_visualizacion<='%s'
+    where c.fecha_visualizacion>=%s and c.fecha_visualizacion<=%s
     group by p.nombre_genero
-    order by sum(c2.duracion) desc  limit 10;"""%(fechaI, fechaF)
+    order by sum(c2.duracion) desc  limit 10;"""
 
-    cursor.execute(query)
+    cursor.execute(query, [fechaI, fechaF])
     generos = cursor.fetchall()
     response=[]
     for elements in generos:
@@ -246,12 +246,12 @@ def get_Reprod(fechaI, fechaF, cuenta, cursor):
     query="""
     select p.nombre_genero, count(*) from consumo c join pertenece p on c.id_contenido = p.id_contenido
     join perfiles p2 on c.id_perfil = p2.id join cuenta c2 on c2.correo = p2.correo_cuenta
-    where c2.tipo_cuenta = '%s' and
-    c.fecha_visualizacion>='%s' and c.fecha_visualizacion<='%s'
+    where c2.tipo_cuenta = %s and
+    c.fecha_visualizacion>=%s and c.fecha_visualizacion<=%s
     group by p.nombre_genero;
-    """%(cuenta, fechaI, fechaF)
+    """
 
-    cursor.execute(query)
+    cursor.execute(query, [cuenta, fechaI, fechaF])
     cuentas = cursor.fetchall()
     response=[]
     for elements in cuentas:
@@ -309,14 +309,15 @@ def get_Cant(cursor):
 
 
 def get_hora(cursor, fecha):
+    fecha1 = fecha + ' 23:59:59.999'
     
     query=f"""
         select hora from (
             select extract(hour from c.fecha_visualizacion) as hora, count(*)  from consumo c 
-            where c.fecha_visualizacion between '{fecha}' and '{fecha} 23:59:59.999'
+            where c.fecha_visualizacion between %s and %s
             group by extract(hour from c.fecha_visualizacion) order by count(*) desc limit 1) as tabla;
     """
-    cursor.execute(query)
+    cursor.execute(query, [fecha, fecha1])
     cant = cursor.fetchall()[0][0]
 
     return jsonify({'hora' : cant})

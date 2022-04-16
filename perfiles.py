@@ -3,12 +3,12 @@ from flask import jsonify
 
 def crear_perfil(connection, cursor, content):
 
-    postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo='%s'"%(content['correo'])
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo= %s"
+    cursor.execute(postgreSQL_select_Query, [content['correo']])
     data = cursor.fetchall()
     if (data):
-        query = "select nombre from perfiles where nombre='%s' and correo_cuenta ='%s';"%(content['nombre'], content['correo'])
-        cursor.execute(query)
+        query = "select nombre from perfiles where nombre= %s and correo_cuenta = %s;"
+        cursor.execute(query, [content['nombre'], content['correo']])
         datas = cursor.fetchall()
         if(datas):
             response = {'message': 'Error: Un perfil con ese nombre ya existe.'}
@@ -18,7 +18,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'basica':
             if conteo < 1:
                 id = content['correo'] + str(conteo + 1)
-                datos = (id, content['nombre'], content['correo'])
+                datos = [id, content['nombre'], content['correo']]
                 commit(connection, cursor, datos)
                 response = { "message" : "Perfil añadido"}
             else:
@@ -26,7 +26,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'estandar':
             if conteo < 4:
                 id = content['correo'] + str(conteo + 1)
-                datos = (id, content['nombre'], content['correo'])
+                datos = [id, content['nombre'], content['correo']]
                 commit(connection, cursor, datos)
                 response = { "message" : "Perfil añadido"}
             else:
@@ -34,7 +34,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'avanzada':
             if conteo < 8:
                 id = content['correo'] + str(conteo + 1)
-                datos = (id, content['nombre'], content['correo'])
+                datos = [id, content['nombre'], content['correo']]
                 commit(connection, cursor, datos) 
                 response = { "message" : "Perfil añadido"}
             else:
@@ -46,8 +46,8 @@ def crear_perfil(connection, cursor, content):
 
 
 def get_profiles(cursor, correo):
-    query = f"select id, nombre from perfiles where correo_cuenta = '{correo}' and activo = true"
-    cursor.execute(query)
+    query = "select id, nombre from perfiles where correo_cuenta = %s and activo = true"
+    cursor.execute(query, [correo])
     data = cursor.fetchall()
     response = []
     if data:
@@ -59,45 +59,45 @@ def get_profiles(cursor, correo):
 
 def get_cuenta(cursor, correo):
     
-    postgreSQL_select_Query = "SELECT tipo_cuenta FROM cuenta WHERE correo='%s'"%(correo)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT tipo_cuenta FROM cuenta WHERE correo= %s;"
+    cursor.execute(postgreSQL_select_Query, [correo])
     data = cursor.fetchall()
     
     return data[0][0]
 
 def get_count(cursor, correo):
     
-    postgreSQL_select_Query = "select count(correo_cuenta) from perfiles where correo_cuenta = '%s'"%(correo)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "select count(correo_cuenta) from perfiles where correo_cuenta = %s;"
+    cursor.execute(postgreSQL_select_Query, [correo])
     conteo = cursor.fetchall()
     return int(conteo[0][0])
 
 def commit(connection, cursor, data):
-    sql = "insert into perfiles values ('%s', '%s', '%s', true, current_date)"
-    cursor.execute(sql%data)
+    sql = "insert into perfiles values (%s, %s, %s, true, current_date)"
+    cursor.execute(sql, data)
     connection.commit()
 
 def actualizar_perfil(cursor, content, connection):
     print(content)
     if(content['dentro'] == 'false'):
-        query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = '%s' AND nombre = '%s'"%(content['dentro'], content['correo'], content['nombre'])
-        cursor.execute(query)
+        query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = %s AND nombre = %s;"
+        cursor.execute(query, [content['dentro'], content['correo'], content['nombre']])
         connection.commit()
         response = {"message": "success"}
         return jsonify(response)
     else:
-        query2 = "SELECT dentro FROM perfiles WHERE correo_cuenta = '%s' AND dentro = true AND nombre = '%s'"%(content['correo'], content['nombre'])
-        cursor.execute(query2)
+        query2 = "SELECT dentro FROM perfiles WHERE correo_cuenta = %s AND dentro = true AND nombre = %s;"
+        cursor.execute(query2, [content['correo'], content['nombre']])
         dentroo = cursor.fetchall()
         if(dentroo):
             response = {"message": "Error: Este perfil ya esta en uso."}
             return jsonify(response)
         else:
-            query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = '%s' AND nombre = '%s'"%(content['dentro'], content['correo'], content['nombre'])
-            cursor.execute(query)
+            query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = %s AND nombre = %s;"
+            cursor.execute(query, [content['dentro'], content['correo'], content['nombre']])
             connection.commit()
-            query3 = "SELECT id FROM perfiles WHERE nombre='%s' AND correo_cuenta='%s'"%(content['nombre'], content['correo'])
-            cursor.execute(query3)
+            query3 = "SELECT id FROM perfiles WHERE nombre= %s AND correo_cuenta= %s;"
+            cursor.execute(query3, [content['nombre'], content['correo']])
             perfil = cursor.fetchall()
             response = {"message": perfil[0][0]}
             return jsonify(response)

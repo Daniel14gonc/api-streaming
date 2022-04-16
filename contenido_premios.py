@@ -1,9 +1,10 @@
 from flask import jsonify
 
 def get_contenido_premios(cursor, premio):
+    premio = '%' + premio + '%'
     query = f'''select distinct(c.nombre), c.link from premiacion p join contenido c on c.id = p.id_contenido
-                where p.nombre_premio ILIKE '%{premio}%' '''
-    cursor.execute(query)
+                where p.nombre_premio ILIKE %s '''
+    cursor.execute(query, [premio])
     data = cursor.fetchall()
     if data:
         result = []

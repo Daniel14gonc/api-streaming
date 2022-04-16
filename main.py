@@ -46,8 +46,8 @@ def add_directores():
     lista = []
     for keys in content:
         lista.append(str(content[keys]))
-    sql = "INSERT INTO director VALUES('%s', '%s')"
-    cursor.execute(sql%tuple(lista))
+    sql = "INSERT INTO director VALUES(%s, %s)"
+    cursor.execute(sql,lista)
     connection.commit()
     response = {'message': 'success 200'}
     return jsonify(response)
@@ -56,8 +56,8 @@ def add_directores():
 def signin():
     correo = request.headers.get('correo')
     password = request.headers.get('password')
-    postgreSQL_select_Query = "SELECT passw FROM cuenta WHERE correo='%s' and activo = true"%(correo)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT passw FROM cuenta WHERE correo=%s and activo = true;"
+    cursor.execute(postgreSQL_select_Query, [correo])
     data = cursor.fetchall()
     response = {'message' : 'error 401'}
     if data:
@@ -66,8 +66,8 @@ def signin():
             response = {'message': 'success 200'}
         else:
             time = datetime.now()
-            quericito = "INSERT INTO intentos VALUES('%s','%s');"%(correo, time)
-            cursor.execute(quericito)
+            quericito = "INSERT INTO intentos VALUES (%s,%s);"
+            cursor.execute(quericito, [correo, time])
             connection.commit()
             response = {'message' : 'error 409'}
 
@@ -79,12 +79,12 @@ def logon():
     datos = []
     for keys in content:
         datos.append(content[keys])
-    postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo='%s'"%(content['correo'])
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo= %s"
+    cursor.execute(postgreSQL_select_Query, [content['correo']])
     data = cursor.fetchall()
     if (not data):
-        sql = "insert into cuenta values ('%s', '%s', '%s', true, current_timestamp);"
-        cursor.execute(sql%tuple(datos))
+        sql = "insert into cuenta values (%s, %s, %s, true, current_timestamp);"
+        cursor.execute(sql, datos)
         connection.commit()
         response = {'message': 'success'}
     else:
@@ -96,8 +96,8 @@ def logon():
 def signinAdmin():
     correo = request.headers.get('correo')
     password = request.headers.get('password')
-    postgreSQL_select_Query = "SELECT passw FROM administrador WHERE correo='%s'"%(correo)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT passw FROM administrador WHERE correo= %s;"
+    cursor.execute(postgreSQL_select_Query, [correo])
     data = cursor.fetchall()
     print(data)
     if data:
@@ -117,12 +117,12 @@ def logonAdmin():
     datos = []
     for keys in content:
         datos.append(content[keys])
-    postgreSQL_select_Query = "SELECT correo FROM administrador WHERE correo='%s'"%(content['correo'])
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT correo FROM administrador WHERE correo= %s;"
+    cursor.execute(postgreSQL_select_Query, [content['correo']])
     data = cursor.fetchall()
     if (not data):
-        sql = "insert into administrador values ('%s', '%s');"
-        cursor.execute(sql%tuple(datos))
+        sql = "insert into administrador values (%s, %s);"
+        cursor.execute(sql, [datos])
         connection.commit()
         response = {'message': 'success'}
     else:
@@ -151,23 +151,24 @@ def update_perfiles():
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
     nombre = request.headers.get('nombre')
+    nombre = '%' + nombre + '%'
 
-    megaQuery = f'''select nombre, link, imagen from contenido where nombre ILIKE '%{nombre}%'
+    megaQuery = f'''select nombre, link, imagen from contenido where nombre ILIKE %s
                     union
-                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN pertenece p on c.id = p.id_contenido WHERE p.nombre_genero ILIKE '%{nombre}%'
+                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN pertenece p on c.id = p.id_contenido WHERE p.nombre_genero ILIKE %s
                     union
-                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN actuan a on c.id = a.id_contenido JOIN estrellas e on a.id_estrella = e.id WHERE e.nombre ILIKE '%{nombre}%'
+                    SELECT distinct(c.nombre), c.link, c.imagen FROM contenido c JOIN actuan a on c.id = a.id_contenido JOIN estrellas e on a.id_estrella = e.id WHERE e.nombre ILIKE %s
                     union
-                    select distinct(c.nombre), c.link, c.imagen from premiacion p join contenido c on c.id = p.id_contenido where p.nombre_premio ILIKE '%{nombre}%' 
+                    select distinct(c.nombre), c.link, c.imagen from premiacion p join contenido c on c.id = p.id_contenido where p.nombre_premio ILIKE %s
                     union
-                    select nombre, link, imagen from contenido where cast(fecha_estreno as varchar) like '%{nombre}%'
+                    select nombre, link, imagen from contenido where cast(fecha_estreno as varchar) like %s
                     union
                     select distinct(p.nombre), p.link, p.imagen from director d join contenido p on d.id=p.id_director 
-                    where d.nombre ilike '%{nombre}%';
+                    where d.nombre ilike %s;
 
     '''
 
-    cursor.execute(megaQuery)
+    cursor.execute(megaQuery, [nombre, nombre, nombre, nombre, nombre, nombre])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -178,8 +179,8 @@ def get_contenido():
 @app.route('/api/contenido_generos', methods=['GET'])
 def get_contenido_by_genero():
     genero = request.headers.get('genero')
-    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN pertenece p on c.id " + "=" +" p.id_contenido WHERE p.nombre_genero ILIKE '%s';"%(genero)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN pertenece p on c.id " + "=" +" p.id_contenido WHERE p.nombre_genero ILIKE %s;"
+    cursor.execute(postgreSQL_select_Query, [genero])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -190,8 +191,8 @@ def get_contenido_by_genero():
 @app.route('/api/contenido_actores', methods=['GET'])
 def get_contenido_by_estrella():
     estrella = request.headers.get('estrella')
-    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN actuan a on c.id " + "=" +" a.id_contenido JOIN estrellas e on a.id_estrella " + "=" + " e.id WHERE e.nombre ILIKE '%s';"%(estrella)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT c.nombre, c.link FROM contenido c JOIN actuan a on c.id " + "=" +" a.id_contenido JOIN estrellas e on a.id_estrella " + "=" + " e.id WHERE e.nombre ILIKE %s;"
+    cursor.execute(postgreSQL_select_Query, [estrella])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -208,15 +209,14 @@ def get_contenido_by_premios():
 @app.route('/api/sugerencias', methods=['GET'])
 def get_sugrencias():
     premio = request.headers.get('id')
-
     return get_contenido_sugerido(cursor, premio)
 
 
 @app.route('/api/verdenuevo', methods=['GET'])
 def get_verdenuevo():
     perfil = request.headers.get('id')
-    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=true"%(perfil)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = %s AND terminado=true;"
+    cursor.execute(postgreSQL_select_Query, [perfil])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -235,8 +235,8 @@ def get_random():
 @app.route('/api/seguirviendo', methods=['GET'])
 def get_seguirviendo():
     perfil = request.headers.get('id')
-    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = '%s' AND terminado=false"%(perfil)
-    cursor.execute(postgreSQL_select_Query)
+    postgreSQL_select_Query = "SELECT contenido.nombre, contenido.link, contenido.imagen FROM visto JOIN contenido ON visto.id_contenido = contenido.id WHERE visto.id_perfil = %s AND terminado=false;"
+    cursor.execute(postgreSQL_select_Query, [perfil])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -258,8 +258,8 @@ def get_allContent():
 @app.route('/api/favoritos', methods=['GET'])
 def get_favorites():
     perfil = request.headers.get('id')
-    query = "SELECT c.nombre, c.link, c.imagen FROM contenido c JOIN favoritos f ON c.id = f.id_contenido WHERE id_perfil = '%s';"
-    cursor.execute(query%perfil)
+    query = "SELECT c.nombre, c.link, c.imagen FROM contenido c JOIN favoritos f ON c.id = f.id_contenido WHERE id_perfil = %s;"
+    cursor.execute(query, [perfil])
     contenido = cursor.fetchall()
     response = []
     for elements in contenido:
@@ -270,12 +270,12 @@ def get_favorites():
 @app.route('/api/favoritos', methods=['POST'])
 def agregar_favoritos():
     content = request.json
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [content['nombre']])
     contenido = cursor.fetchall()
     contenido = contenido[0][0]
-    query1 = "insert into favoritos values('%s', '%s')"%(content['idperfil'],contenido)
-    cursor.execute(query1)
+    query1 = "insert into favoritos values(%s, %s);"
+    cursor.execute(query1, [content['idperfil'],contenido])
     connection.commit()
     response = {"message": "success"}
     return jsonify(response)
@@ -283,12 +283,12 @@ def agregar_favoritos():
 @app.route('/api/favoritos', methods=['DELETE'])
 def delete_favoritos():
     content = request.json
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [content['nombre']])
     contenido = cursor.fetchall()
     contenido = contenido[0][0]
-    query1 = "DELETE FROM favoritos WHERE id_perfil = '%s' AND id_contenido = '%s'"%(content['idperfil'],contenido)
-    cursor.execute(query1)
+    query1 = "DELETE FROM favoritos WHERE id_perfil = %s AND id_contenido = %s;"
+    cursor.execute(query1, [content['idperfil'],contenido])
     connection.commit()
     response = {"message": "success"}
     return jsonify(response)
@@ -297,15 +297,15 @@ def delete_favoritos():
 def modify_consumo():
     id = request.headers.get('id')
     nombre = request.headers.get('contenido')
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [nombre])
     contenido = cursor.fetchall()
     id_contenido = contenido[0][0]
 
     time = datetime.now()
 
-    query1 = "INSERT INTO consumo values('%s', '%s', '%s')"%(id, id_contenido, time)
-    cursor.execute(query1)
+    query1 = "INSERT INTO consumo values(%s, %s, %s);"
+    cursor.execute(query1, [id, id_contenido, time])
     connection.commit()
     response = {"message": "success"}
     return jsonify(response)
@@ -314,19 +314,19 @@ def modify_consumo():
 def agregar_visto():
     content = request.json
     cursor = connection.cursor()
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [content['nombre']])
     data = cursor.fetchall()
-    query2 = "SELECT * FROM visto WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0][0], content['id'])
-    cursor.execute(query2)
+    query2 = "SELECT * FROM visto WHERE id_contenido = %s AND id_perfil = %s;"
+    cursor.execute(query2, [data[0][0], content['id']])
     datos = cursor.fetchall()
     if(datos):
-        query3 = "UPDATE visto SET terminado = false WHERE id_contenido = '%s' AND id_perfil = '%s'"%(data[0][0], content['id'])
-        cursor.execute(query3)
+        query3 = "UPDATE visto SET terminado = false WHERE id_contenido = %s AND id_perfil = %s;"
+        cursor.execute(query3, [data[0][0], content['id']])
         connection.commit()
     else:
-        query4 = "INSERT INTO visto VALUES ('%s', '%s', false)"%(content['id'], data[0][0])
-        cursor.execute(query4)
+        query4 = "INSERT INTO visto VALUES (%s, %s, false);"
+        cursor.execute(query4, [content['id'], data[0][0]])
         connection.commit()
     return jsonify({'message': 'success'})
 
@@ -334,19 +334,18 @@ def agregar_visto():
 def modify_visto():
     content = request.json
     cursor = connection.cursor()
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(content['nombre'])
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [content['nombre']])
     data = cursor.fetchall()
-    query = "update visto set terminado=true where id_perfil='%s' and id_contenido='%s';"%(content['id'],data[0][0])
-    cursor.execute(query)
+    query = "update visto set terminado=true where id_perfil=%s and id_contenido=%s;"
+    cursor.execute(query, [content['id'],data[0][0]])
     return jsonify({'message': 'success'})
 
 @app.route('/api/ajustecuenta', methods=['GET'])
 def ajustar_cuenta():
     correo = request.headers.get("correo")
-    query = "SELECT tipo_cuenta FROM cuenta WHERE correo='%s';"%correo
-    print(query)
-    cursor.execute(query)
+    query = "SELECT tipo_cuenta FROM cuenta WHERE correo= %s;"
+    cursor.execute(query, [correo])
     tipo = cursor.fetchall()
     response = {"tipo": tipo[0][0]}
     return jsonify(response)
@@ -357,8 +356,8 @@ def actualizar_cuenta():
     datos = []
     for keys in content:
         datos.append(content[keys])
-    query = "UPDATE cuenta SET tipo_cuenta='%s' WHERE correo='%s'"%(datos[0], datos[1])
-    cursor.execute(query)
+    query = "UPDATE cuenta SET tipo_cuenta=%s WHERE correo=%s;"
+    cursor.execute(query, [datos[0], datos[1]])
     connection.commit()
     cant = 0
     if datos[0] == 'basica' :
@@ -368,27 +367,27 @@ def actualizar_cuenta():
     elif datos[0] == 'avanzada' :
         cant =8 
 
-    query = f"""select id from perfiles where correo_cuenta = '{datos[1]}' and cast(right(id, 1) as integer) <= {cant} order by cast(right(id, 1) as integer) asc""" 
-    cursor.execute(query)
+    query = """select id from perfiles where correo_cuenta = %s and cast(right(id, 1) as integer) <= %s order by cast(right(id, 1) as integer) asc""" 
+    cursor.execute(query, [datos[1], cant])
     data = cursor.fetchall()
     stored = []
     for elementos in data:
         stored.append(elementos[0])
     
     for elementos in stored:
-        query = f"update perfiles set activo=true where id='{elementos}'"
-        cursor.execute(query)
+        query = "update perfiles set activo=true where id=%s"
+        cursor.execute(query, [elementos])
 
-    query = f"""select id from perfiles where correo_cuenta = '{datos[1]}' and cast(right(id, 1) as integer) > {cant} order by cast(right(id, 1) as integer) asc""" 
-    cursor.execute(query)
+    query = """select id from perfiles where correo_cuenta = %s and cast(right(id, 1) as integer) > %s order by cast(right(id, 1) as integer) asc""" 
+    cursor.execute(query, [datos[1], cant])
     data = cursor.fetchall()
     stored = []
     for elementos in data:
         stored.append(elementos[0])
     
     for elementos in stored:
-        query = f"update perfiles set activo=false where id='{elementos}'"
-        cursor.execute(query)
+        query = "update perfiles set activo=false where id=%s"
+        cursor.execute(query, [elementos])
     connection.commit()
 
     response = {"message": "success"}
@@ -405,15 +404,15 @@ def get_anuncio():
         response.append(new_obj)
     
     nombre = request.headers.get('nombre')
-    query = "SELECT id FROM contenido WHERE nombre = '%s'"%(nombre)
-    cursor.execute(query)
+    query = "SELECT id FROM contenido WHERE nombre = %s;"
+    cursor.execute(query, [nombre])
     contenido = cursor.fetchall()
     id_contenido = contenido[0][0]
 
 
     time = datetime.now()
-    query1 = "INSERT INTO regis_anun values('%s', '%s', '%s')"%(id_contenido, response[0]['id'], time)
-    cursor.execute(query1)
+    query1 = "INSERT INTO regis_anun values(%s, %s, %s);"
+    cursor.execute(query1, [id_contenido, response[0]['id'], time])
     connection.commit()
 
     return jsonify({'link': response[0]['link']})
