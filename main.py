@@ -9,6 +9,7 @@ from contenido_premios import *
 from contenido_sugerido import *
 from admin import *
 from datetime import datetime
+import socket
 
 connection = psycopg2.connect(user="postgres",
                                   password="ketchup14",
@@ -16,7 +17,14 @@ connection = psycopg2.connect(user="postgres",
                                   port="5432",
                                   database="Streaming")
 
+s = socket.fromfd(connection.fileno(), socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 6)
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 2)
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)
+
 cursor = connection.cursor()
+
 
 def create_app(enviroment):
     app = Flask(__name__)
