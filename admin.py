@@ -111,8 +111,7 @@ def change_anunciante2(connection, cursor, content):
 
 def delete_anunciante(connection, cursor, nombre):
     query = "DELETE FROM anunciante WHERE nombre = %s;"
-    print(query, [nombre])
-    cursor.execute(query)
+    cursor.execute(query,[nombre])
     connection.commit()
 
     return jsonify({'message': 'success'})
