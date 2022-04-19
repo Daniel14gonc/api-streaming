@@ -137,7 +137,7 @@ def crear_pelicula(connection, cursor, content):
   
   
     query = "SELECT id FROM director WHERE nombre=%s;"
-    cursor.execute(query, list[2])
+    cursor.execute(query, [list[2]])
     id_d = cursor.fetchall()[0][0]
     
     query = "SELECT id FROM contenido order by id desc limit 1;"
