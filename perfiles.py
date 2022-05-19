@@ -18,7 +18,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'basica':
             if conteo < 1:
                 id = content['correo'] + str(conteo + 1)
-                datos = [id, content['nombre'], content['correo']]
+                datos = [id, content['nombre'], content['correo'], content['correo']]
                 commit(connection, cursor, datos)
                 response = { "message" : "Perfil añadido"}
             else:
@@ -26,7 +26,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'estandar':
             if conteo < 4:
                 id = content['correo'] + str(conteo + 1)
-                datos = [id, content['nombre'], content['correo']]
+                datos = [id, content['nombre'], content['correo'], content['correo']]
                 commit(connection, cursor, datos)
                 response = { "message" : "Perfil añadido"}
             else:
@@ -34,7 +34,7 @@ def crear_perfil(connection, cursor, content):
         if tipo == 'avanzada':
             if conteo < 8:
                 id = content['correo'] + str(conteo + 1)
-                datos = [id, content['nombre'], content['correo']]
+                datos = [id, content['nombre'], content['correo'], content['correo']]
                 commit(connection, cursor, datos) 
                 response = { "message" : "Perfil añadido"}
             else:
@@ -73,7 +73,7 @@ def get_count(cursor, correo):
     return int(conteo[0][0])
 
 def commit(connection, cursor, data):
-    sql = "insert into perfiles values (%s, %s, %s, true, current_date)"
+    sql = "insert into perfiles values (%s, %s, %s, true, current_date, false, %s, 'insert')"
     cursor.execute(sql, data)
     connection.commit()
 

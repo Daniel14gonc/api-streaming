@@ -87,11 +87,12 @@ def logon():
     datos = []
     for keys in content:
         datos.append(content[keys])
+    datos.append(content['correo'])
     postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo= %s"
     cursor.execute(postgreSQL_select_Query, [content['correo']])
     data = cursor.fetchall()
     if (not data):
-        sql = "insert into cuenta values (%s, %s, %s, true, current_timestamp);"
+        sql = "insert into cuenta values (%s, %s, %s, true, current_timestamp, 'insert', %s);"
         cursor.execute(sql, datos)
         connection.commit()
         response = {'message': 'success'}
@@ -364,8 +365,8 @@ def actualizar_cuenta():
     datos = []
     for keys in content:
         datos.append(content[keys])
-    query = "UPDATE cuenta SET tipo_cuenta=%s WHERE correo=%s;"
-    cursor.execute(query, [datos[0], datos[1]])
+    query = "UPDATE cuenta SET tipo_cuenta=%s, administrador =%s, accion = 'update' WHERE correo=%s;"
+    cursor.execute(query, [datos[0], datos[1], datos[1]])
     connection.commit()
     cant = 0
     if datos[0] == 'basica' :
@@ -467,7 +468,8 @@ def change_anun():
 @app.route('/api/anuncios', methods=['DELETE'])
 def delete_anun():
     content = request.headers.get('id')
-    return delete_anuncios(connection, cursor, content)
+    admin = request.headers.get('administrador')
+    return delete_anuncios(admin, content)
 
 @app.route('/api/cuentas', methods=['PUT'])
 def change_corre():
@@ -482,8 +484,9 @@ def change_nunciante():
 @app.route('/api/anunciante', methods=['DELETE'])
 def delete_nunciante():
     nombre = request.headers.get('nombre')
+    admin = request.headers.get('administrador')
     print(nombre)
-    return delete_anunciante(connection, cursor, nombre)
+    return delete_anunciante(admin, nombre)
 
 @app.route('/api/premios', methods=['GET'])
 def get_Premios():
@@ -497,7 +500,8 @@ def create_Film():
 @app.route('/api/contenido', methods=['DELETE'])
 def delete_ontenido():
     nombre = request.headers.get('nombre')
-    return delete_contenido(connection, cursor, nombre)
+    administrador = request.headers.get('administrador')
+    return delete_contenido(connection, cursor, nombre, administrador)
 
 @app.route('/api/anunciantes', methods=['POST'])
 def create_ANUNCIANTE():
@@ -560,6 +564,12 @@ def getPico():
 def insertAdmin():
     content = request.json
     return crear_admin(cursor, content, connection)
+
+@app.route('/api/simulacion', methods=['POST'])
+def simulation():
+    content = request.json
+
+    return ejecutar_simulacion(cursor, connection, content['fecha'], content['cantidad'])
 
 
 if __name__ == '__main__':
