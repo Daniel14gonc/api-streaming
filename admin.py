@@ -16,12 +16,13 @@ def admin_activado(cursor, content, connection):
     query1 = "select activo from cuenta where correo=%s;"
     cursor.execute(query1, [content['correo']])
     valor = cursor.fetchall()
+    print(content['correo'])
     if(valor[0][0]==True):
-        query = "update cuenta set activo = false where correo=%s;"
-        cursor.execute(query, [content['correo']])
+        query = "update cuenta set activo = false, administrador= %s, accion = 'update' where correo=%s;"
+        cursor.execute(query, [content['admin'], content['correo']])
     else:
-        query = "update cuenta set activo = true where correo=%s;"
-        cursor.execute(query, [content['correo']])
+        query = "update cuenta set activo = true, administrador= %s, accion = 'update' where correo=%s;"
+        cursor.execute(query, [content['admin'], content['correo']])
     connection.commit()
 
     return jsonify({'message': 'success'})
@@ -96,8 +97,8 @@ def delete_anuncios(connection, cursor, id):
 
 def change_correo(connection, cursor, content):
     print(content)
-    query = "UPDATE cuenta set correo = %s where correo=%s;"
-    cursor.execute(query, [content['new'], content['old']])
+    query = "UPDATE cuenta set correo = %s, administrador = %s, accion = 'update' where correo=%s;"
+    cursor.execute(query, [content['new'], content['admin'], content['old']])
     connection.commit()
 
     return jsonify({'message': 'success'})
@@ -320,5 +321,19 @@ def get_hora(cursor, fecha):
     cant = cursor.fetchall()[0][0]
 
     return jsonify({'hora' : cant})
+
+def crear_admin(cursor, content, connection):
+    try:
+        usuario = content['usuario']
+        contra = content['contrasena']
+        query = "INSERT INTO administrador VALUES(%s, %s)"
+        cursor.execute(query,[usuario, contra])
+        connection.commit()
+        return jsonify({"message":"success"})
+    except:
+        return jsonify({"message":"error"})
+
+
+
 
 

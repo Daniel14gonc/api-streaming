@@ -556,6 +556,11 @@ def getPico():
     fechaI = request.headers.get('fechaI')
     return get_hora(cursor, fechaI)
 
+@app.route('/api/newAdmin', methods=['POST'])
+def insertAdmin():
+    content = request.json
+    return crear_admin(cursor, content, connection)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
