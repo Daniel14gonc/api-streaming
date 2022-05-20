@@ -571,6 +571,50 @@ def simulation():
 
     return ejecutar_simulacion(cursor, connection, content['fecha'], content['cantidad'])
 
+@app.route('/api/busqueda', methods=['POST'])
+def busqueda():
+    content = request.json['busqueda']
+    query = "INSERT INTO termino_busqueda values (%s)"
+    cursor.execute(query, [content])
+    connection.commit()
+    return jsonify({"message":"success"})
+
+@app.route('/api/busqueda', methods=['GET'])
+def busqueda_terminos():
+    query = "select * from top_terminos"
+    cursor.execute(query)
+    terminos = cursor.fetchall()
+    response = []
+    for elements in terminos:
+        new_obj = {'termino': elements[0], 'count': elements[1]}
+        response.append(new_obj)
+    return jsonify(response)
+
+@app.route('/api/top_5_admin', methods=['GET'])
+def admins():
+    fechaI = request.headers.get('fechaI')
+    fechaF = request.headers.get('fechaF')
+    query = "SELECT * FROM top_admin(%s, %s)"
+    cursor.execute(query, [fechaI, fechaF])
+    admins = cursor.fetchall()
+    response = []
+    for elements in admins:
+        new_obj = {'nombre': elements[0]}
+        response.append(new_obj)
+    return jsonify(response)
+
+@app.route('/api/sinTerminar', methods=['GET'])
+def top_sin_terminar():
+    fechaI = request.headers.get('fechaI')
+    fechaF = request.headers.get('fechaF')
+    query = "SELECT * FROM sinterminar(%s, %s)"
+    cursor.execute(query, [fechaI, fechaF])
+    admins = cursor.fetchall()
+    response = []
+    for elements in admins:
+        new_obj = {'nombre': elements[0]}
+        response.append(new_obj)
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)

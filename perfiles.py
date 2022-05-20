@@ -80,8 +80,8 @@ def commit(connection, cursor, data):
 def actualizar_perfil(cursor, content, connection):
     print(content)
     if(content['dentro'] == 'false'):
-        query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = %s AND nombre = %s;"
-        cursor.execute(query, [content['dentro'], content['correo'], content['nombre']])
+        query = "UPDATE perfiles SET dentro = %s, cuenta = %s, accion = 'update' WHERE correo_cuenta = %s AND nombre = %s;"
+        cursor.execute(query, [content['dentro'], content['correo'], content['correo'], content['nombre']])
         connection.commit()
         response = {"message": "success"}
         return jsonify(response)
@@ -93,8 +93,8 @@ def actualizar_perfil(cursor, content, connection):
             response = {"message": "Error: Este perfil ya esta en uso."}
             return jsonify(response)
         else:
-            query = "UPDATE perfiles SET dentro = %s WHERE correo_cuenta = %s AND nombre = %s;"
-            cursor.execute(query, [content['dentro'], content['correo'], content['nombre']])
+            query = "UPDATE perfiles SET dentro = %s, cuenta = %s, accion = 'update' WHERE correo_cuenta = %s AND nombre = %s;"
+            cursor.execute(query, [content['dentro'], content['correo'], content['correo'], content['nombre']])
             connection.commit()
             query3 = "SELECT id FROM perfiles WHERE nombre= %s AND correo_cuenta= %s;"
             cursor.execute(query3, [content['nombre'], content['correo']])
