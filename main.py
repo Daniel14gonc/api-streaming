@@ -616,5 +616,18 @@ def top_sin_terminar():
         response.append(new_obj)
     return jsonify(response)
 
+@app.route('/api/Pormes', methods=['GET'])
+def top_por_mes():
+    mes = request.headers.get('mes')
+    print(mes)
+    query = "SELECT * FROM top5(%s)"
+    cursor.execute(query, [mes])
+    admins = cursor.fetchall()
+    response = []
+    for elements in admins:
+        new_obj = {'hora': elements[0], 'nombre': elements[1]}
+        response.append(new_obj)
+    return jsonify(response)
+
 if __name__ == '__main__':
     app.run(debug=True)
