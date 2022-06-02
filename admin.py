@@ -3,7 +3,13 @@ from psycopg2 import extensions
 import psycopg2
 
 
-def admin_getCuenta(cursor):
+def admin_getCuenta(cursor1):
+    conn = psycopg2.connect(user="postgres",
+                                password="ketchup14",
+                                host="streaming.cddkmwmgfell.us-east-1.rds.amazonaws.com",
+                                port="5432",
+                                database="Streaming")
+    cursor = conn.cursor()
     query = "SELECT correo, activo FROM cuenta order by correo;"
     cursor.execute(query)
     cuentas = cursor.fetchall()
@@ -11,6 +17,8 @@ def admin_getCuenta(cursor):
     for elements in cuentas:
         new_obj = {'correo': elements[0], 'activo' : elements[1]}
         response.append(new_obj)
+    conn.commit()
+    conn.close()
     return jsonify(response)
 
 def admin_activado(cursor, content, connection):
@@ -381,6 +389,7 @@ def crear_admin(cursor, content, connection):
         connection.commit()
         return jsonify({"message":"success"})
     except:
+        connection.commit()
         return jsonify({"message":"error"})
 
 def ejecutar_simulacion(cursor, connection, fecha, cantidad):

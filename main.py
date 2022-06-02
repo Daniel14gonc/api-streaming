@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 from flask import jsonify
 from config import config
 import psycopg2
+from psycopg2 import extensions
 from perfiles import *
 from contenido_premios import *
 from contenido_sugerido import *
@@ -83,6 +84,14 @@ def signin():
 
 @app.route('/api/logon', methods=['POST'])
 def logon():
+    conn = psycopg2.connect(user="postgres",
+                                  password="ketchup14",
+                                  host="streaming.cddkmwmgfell.us-east-1.rds.amazonaws.com",
+                                  port="5432",
+                                  database="Streaming")
+    serializable = extensions.ISOLATION_LEVEL_SERIALIZABLE
+    conn.set_isolation_level(serializable)
+    cursor = conn.cursor()
     content = request.json
     datos = []
     for keys in content:
@@ -94,11 +103,11 @@ def logon():
     if (not data):
         sql = "insert into cuenta values (%s, %s, %s, true, current_timestamp, 'insert', %s);"
         cursor.execute(sql, datos)
-        connection.commit()
+        conn.commit()
         response = {'message': 'success'}
     else:
         response = {'message': 'error 409'}
-
+    conn.close()
     return jsonify(response)
 
 @app.route('/api/signinAdmin', methods=['GET'])
@@ -143,7 +152,7 @@ def logonAdmin():
 def add_perfiles():
     content = request.json
     
-    return crear_perfil(connection, cursor, content)
+    return crear_perfil(content)
 
 @app.route('/api/perfiles', methods=['GET'])
 def get_perfiles():
@@ -154,8 +163,16 @@ def get_perfiles():
 @app.route('/api/perfiles', methods=['PUT'])
 def update_perfiles():
     content = request.json
+    conn1 = psycopg2.connect(user="postgres",
+                                  password="ketchup14",
+                                  host="streaming.cddkmwmgfell.us-east-1.rds.amazonaws.com",
+                                  port="5432",
+                                  database="Streaming")
+    serializable = extensions.ISOLATION_LEVEL_SERIALIZABLE
+    conn1.set_isolation_level(serializable)
+    cursor = conn1.cursor()
     
-    return actualizar_perfil(cursor, content, connection)
+    return actualizar_perfil(cursor, content, conn1)
 
 @app.route('/api/contenido', methods=['GET'])
 def get_contenido():
@@ -365,6 +382,7 @@ def actualizar_cuenta():
     datos = []
     for keys in content:
         datos.append(content[keys])
+    print(datos)
     query = "UPDATE cuenta SET tipo_cuenta=%s, administrador =%s, accion = 'update' WHERE correo=%s;"
     cursor.execute(query, [datos[0], datos[1], datos[1]])
     connection.commit()
@@ -384,8 +402,8 @@ def actualizar_cuenta():
         stored.append(elementos[0])
     
     for elementos in stored:
-        query = "update perfiles set activo=true where id=%s"
-        cursor.execute(query, [elementos])
+        query = "update perfiles set activo=true, cuenta=%s, accion='update' where id=%s"
+        cursor.execute(query, [datos[1], elementos])
 
     query = """select id from perfiles where correo_cuenta = %s and cast(right(id, 1) as integer) > %s order by cast(right(id, 1) as integer) asc""" 
     cursor.execute(query, [datos[1], cant])
@@ -395,8 +413,8 @@ def actualizar_cuenta():
         stored.append(elementos[0])
     
     for elementos in stored:
-        query = "update perfiles set activo=false where id=%s"
-        cursor.execute(query, [elementos])
+        query = "update perfiles set activo=false, cuenta=%s, accion='update' where id=%s"
+        cursor.execute(query, [datos[1], elementos])
     connection.commit()
 
     response = {"message": "success"}

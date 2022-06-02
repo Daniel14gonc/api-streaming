@@ -1,7 +1,17 @@
-from urllib import response
 from flask import jsonify
+from psycopg2 import extensions
+import psycopg2
 
-def crear_perfil(connection, cursor, content):
+def crear_perfil(content):
+
+    connection = psycopg2.connect(user="postgres",
+                                  password="ketchup14",
+                                  host="streaming.cddkmwmgfell.us-east-1.rds.amazonaws.com",
+                                  port="5432",
+                                  database="Streaming")
+    serializable = extensions.ISOLATION_LEVEL_SERIALIZABLE
+    connection.set_isolation_level(serializable)
+    cursor = connection.cursor()
 
     postgreSQL_select_Query = "SELECT correo FROM cuenta WHERE correo= %s"
     cursor.execute(postgreSQL_select_Query, [content['correo']])
@@ -41,7 +51,7 @@ def crear_perfil(connection, cursor, content):
                 response = {"message" : "Error: Ya llegaste al limite de perfiles."}
     else:
         response = {'message': 'Error: Correo no existente.'}
-
+    connection.close()
     return jsonify(response)
 
 
@@ -84,6 +94,7 @@ def actualizar_perfil(cursor, content, connection):
         cursor.execute(query, [content['dentro'], content['correo'], content['correo'], content['nombre']])
         connection.commit()
         response = {"message": "success"}
+        connection.close()
         return jsonify(response)
     else:
         query2 = "SELECT dentro FROM perfiles WHERE correo_cuenta = %s AND dentro = true AND nombre = %s;"
@@ -91,6 +102,7 @@ def actualizar_perfil(cursor, content, connection):
         dentroo = cursor.fetchall()
         if(dentroo):
             response = {"message": "Error: Este perfil ya esta en uso."}
+            connection.close()
             return jsonify(response)
         else:
             query = "UPDATE perfiles SET dentro = %s, cuenta = %s, accion = 'update' WHERE correo_cuenta = %s AND nombre = %s;"
@@ -100,4 +112,5 @@ def actualizar_perfil(cursor, content, connection):
             cursor.execute(query3, [content['nombre'], content['correo']])
             perfil = cursor.fetchall()
             response = {"message": perfil[0][0]}
+            connection.close()
             return jsonify(response)
